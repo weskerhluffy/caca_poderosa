@@ -796,6 +796,8 @@ void caca_poderosa_anade_caca(tipo_dato numero) {
 	cardinalidad_nueva = cardinalidad_actual + 1;
 	nuevo_valor = cardinalidad_nueva * cardinalidad_nueva * numero;
 
+	hash_map_robin_hood_back_shift_indice_pon_valor(tablon, idx,
+			cardinalidad_nueva);
 	mo_mada_resultado = mo_mada_resultado - viejo_valor + nuevo_valor;
 }
 
@@ -811,6 +813,8 @@ void caca_poderosa_quita_caca(tipo_dato numero) {
 	cardinalidad_nueva = cardinalidad_actual - 1;
 	nuevo_valor = cardinalidad_nueva * cardinalidad_nueva * numero;
 
+	hash_map_robin_hood_back_shift_indice_pon_valor(tablon, idx,
+			cardinalidad_nueva);
 	mo_mada_resultado = mo_mada_resultado - viejo_valor + nuevo_valor;
 }
 
