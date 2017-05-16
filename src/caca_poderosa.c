@@ -42,9 +42,13 @@
 #define CACA_COMUN_ASSERT_SUAVECITO 1
 #define CACA_COMUN_ASSERT_NIMADRES 2
 
+#define CACA_PODEROSA_VALOR_INVALIDO -1LL
+
 typedef unsigned int natural;
 typedef int tipo_dato;
 
+typedef long long entero_largo;
+typedef unsigned long long entero_largo_sin_signo;
 typedef long long bitch_vector;
 
 typedef enum BOOLEANOS {
@@ -302,25 +306,24 @@ static inline int caca_comun_lee_matrix_long_stdin(tipo_dato *matrix,
 	return 0;
 }
 
-
 #if 1
 typedef natural hm_iter;
-#define HASH_MAP_VALOR_INVALIDO ((hm_iter)CACA_X_VALOR_INVALIDO)
+#define HASH_MAP_VALOR_INVALIDO ((hm_iter)CACA_PODEROSA_VALOR_INVALIDO)
 typedef struct hash_map_entry {
 	entero_largo llave;
 	entero_largo valor;
-}hm_entry;
+} hm_entry;
 typedef struct hash_map_cubeta {
 	uint64_t hash;
 	hm_entry *entry;
-}hm_cubeta;
+} hm_cubeta;
 typedef struct hash_map_robin_hood_back_shift {
 	hm_cubeta *buckets_;
 	uint64_t num_buckets_;
 	uint64_t num_buckets_used_;
 	uint64_t probing_min_;
 	uint64_t probing_max_;
-}hm_rr_bs_tabla;
+} hm_rr_bs_tabla;
 int hash_map_robin_hood_back_shift_init(hm_rr_bs_tabla *ht, int num_cubetas) {
 	ht->num_buckets_ = num_cubetas;
 	ht->buckets_ = (hm_cubeta *) calloc(ht->num_buckets_, sizeof(hm_cubeta));
@@ -345,7 +348,7 @@ static inline int hash_map_robin_hood_back_shift_llena_distancia_a_indice_inicio
 	hm_cubeta cubeta = ht->buckets_[index_stored];
 	*distance = 0;
 	if (cubeta.entry == NULL )
-	return -1;
+		return -1;
 	uint64_t num_cubetas = ht->num_buckets_;
 	uint64_t index_init = cubeta.hash % num_cubetas;
 	if (index_init <= index_stored) {
@@ -385,8 +388,8 @@ hm_iter hash_map_robin_hood_back_shift_obten(hm_rr_bs_tabla *ht,
 		}
 	}
 	if (found)
-	return index_current;
-	return HASH_MAP_VALOR_INVALIDO;
+		return index_current;
+	return HASH_MAP_VALOR_INVALIDO ;
 }
 hm_iter hash_map_robin_hood_back_shift_pon(hm_rr_bs_tabla *ht, entero_largo key,
 		entero_largo value, bool *nuevo_entry) {
@@ -397,7 +400,7 @@ hm_iter hash_map_robin_hood_back_shift_pon(hm_rr_bs_tabla *ht, entero_largo key,
 	*nuevo_entry = verdadero;
 	if (ht->num_buckets_used_ == num_cubetas) {
 		*nuevo_entry = falso;
-		return HASH_MAP_VALOR_INVALIDO;
+		return HASH_MAP_VALOR_INVALIDO ;
 	}
 	ht->num_buckets_used_ += 1;
 //	uint64_t hash = hash_function_caca(key);
@@ -487,7 +490,7 @@ int hash_map_robin_hood_back_shift_borra(hm_rr_bs_tabla *ht,
 			}
 			uint64_t distance;
 			if (hash_map_robin_hood_back_shift_llena_distancia_a_indice_inicio(
-							ht, index_swap, &distance) != 0) {
+					ht, index_swap, &distance) != 0) {
 				fprintf(stderr, "Error in FillDistanceToInitIndex()");
 			}
 			if (!distance) {
@@ -583,7 +586,7 @@ int hash_map_robin_hood_back_shift_indice_borra(hm_rr_bs_tabla *ht,
 		}
 		uint64_t distance;
 		if (hash_map_robin_hood_back_shift_llena_distancia_a_indice_inicio(ht,
-						index_swap, &distance) != 0) {
+				index_swap, &distance) != 0) {
 			fprintf(stderr, "Error in FillDistanceToInitIndex()");
 		}
 		if (!distance) {
@@ -638,8 +641,6 @@ static inline bool hash_map_robin_hood_back_shift_esta_vacio(hm_rr_bs_tabla *ht)
 	return !ht->num_buckets_used_;
 }
 #endif
-
-
 
 #if 1
 typedef enum mo_mada_tipo_query {
@@ -697,8 +698,8 @@ int mo_mada_ord_idx_query(const void *pa, const void *pb) {
 
 #define mo_mada_fn_ord_mo mo_mada_ord_bloque
 #define mo_mada_fn_ord_idx mo_mada_ord_idx_query
-#define mo_mada_fn_anade_caca caca_x_anade_caca
-#define mo_mada_fn_quita_caca caca_x_quita_caca
+#define mo_mada_fn_anade_caca caca_poderosa_anade_caca
+#define mo_mada_fn_quita_caca caca_poderosa_quita_caca
 
 static inline mo_mada *mo_mada_core(mo_mada *consultas, tipo_dato *numeros,
 		natural num_consultas, natural num_numeros) {
@@ -731,8 +732,7 @@ static inline mo_mada *mo_mada_core(mo_mada *consultas, tipo_dato *numeros,
 				<= mo_mada_tam_bloque * 2);
 #endif
 
-		caca_log_debug("vamos a bailar %u-%u\n", consul_idx_izq,
-				consul_idx_der);
+		caca_log_debug("vamos a bailar %u-%u\n", consul_idx_izq, consul_idx_der);
 
 		caca_log_debug("disminu izq act %u a izq consul %u\n", idx_izq_act,
 				consul_idx_izq);
@@ -775,7 +775,48 @@ static inline mo_mada *mo_mada_core(mo_mada *consultas, tipo_dato *numeros,
 
 #endif
 
+#define CACA_PODEROSA_MAX_CONSULS 200000
+#define CACA_PODEROSA_MAX_NUMS 200000
 
+hm_rr_bs_tabla *tablon = &(hm_rr_bs_tabla ) { 0 };
+mo_mada consultas[CACA_PODEROSA_MAX_CONSULS] = { 0 };
+tipo_dato numeros[CACA_PODEROSA_MAX_NUMS] = { 0 };
+natural consultas_tam = 0;
+natural numeros_tam = 0;
+
+void caca_poderosa_anade_caca(tipo_dato numero) {
+	entero_largo_sin_signo cardinalidad_actual = 0;
+	entero_largo_sin_signo cardinalidad_nueva = 0;
+	entero_largo viejo_valor = 0;
+	entero_largo nuevo_valor = 0;
+	hm_iter idx = 0;
+	idx = hash_map_robin_hood_back_shift_obten(tablon, numero,
+			&cardinalidad_actual);
+	viejo_valor = cardinalidad_actual * cardinalidad_actual * numero;
+	cardinalidad_nueva = cardinalidad_actual + 1;
+	nuevo_valor = cardinalidad_nueva * cardinalidad_nueva * numero;
+
+	mo_mada_resultado = mo_mada_resultado - viejo_valor + nuevo_valor;
+}
+
+void caca_poderosa_quita_caca(tipo_dato numero) {
+	entero_largo_sin_signo cardinalidad_actual = 0;
+	entero_largo_sin_signo cardinalidad_nueva = 0;
+	entero_largo viejo_valor = 0;
+	entero_largo nuevo_valor = 0;
+	hm_iter idx = 0;
+	idx = hash_map_robin_hood_back_shift_obten(tablon, numero,
+			&cardinalidad_actual);
+	viejo_valor = cardinalidad_actual * cardinalidad_actual * numero;
+	cardinalidad_nueva = cardinalidad_actual - 1;
+	nuevo_valor = cardinalidad_nueva * cardinalidad_nueva * numero;
+
+	mo_mada_resultado = mo_mada_resultado - viejo_valor + nuevo_valor;
+}
+
+static inline void caca_poderosa_core() {
+	hash_map_robin_hood_back_shift_init(tablon, CACA_PODEROSA_MAX_NUMS << 1);
+}
 
 int main(void) {
 	puts("he corrido con algo de suerte"); /* prints he corrido con algo de suerte */
