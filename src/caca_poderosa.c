@@ -18,6 +18,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 #include <math.h>
+#include <stdint.h>
 
 #ifdef CACA_COMUN_LOG
 #include <execinfo.h>
@@ -31,7 +32,7 @@
 #include <stdarg.h>
 #endif
 
-#define CACA_COMUN_TAM_MAX_LINEA (11*100000+100000)
+#define CACA_COMUN_TAM_MAX_LINEA (16*200000)
 #define CACA_LOG_MAX_TAM_CADENA 2000
 
 #define CACA_COMUN_BUF_STATICO (char[1000] ) { '\0' }
@@ -55,10 +56,10 @@ typedef enum BOOLEANOS {
 	falso = 0, verdadero
 } bool;
 
-#define CACA_COMUN_TIPO_ASSERT CACA_COMUN_ASSERT_SUAVECITO
 /*
- #define CACA_COMUN_TIPO_ASSERT CACA_COMUN_ASSERT_DUROTE
+#define CACA_COMUN_TIPO_ASSERT CACA_COMUN_ASSERT_SUAVECITO
  */
+ #define CACA_COMUN_TIPO_ASSERT CACA_COMUN_ASSERT_DUROTE
 
 #define assert_timeout_dummy(condition) 0;
 //static inline void caca_log_debug_dummy(const char *format, ...) { }
@@ -642,9 +643,12 @@ static inline bool hash_map_robin_hood_back_shift_esta_vacio(hm_rr_bs_tabla *ht)
 }
 #endif
 
+void caca_poderosa_quita_caca(tipo_dato numero);
+void caca_poderosa_anade_caca(tipo_dato numero);
+
 #if 1
 typedef enum mo_mada_tipo_query {
-	mo_mada_actualizacion = 'U', mo_mada_consulta = 'Q'
+	mo_mada_actualizacion = 'U', mo_mada_consulta = 0
 } mo_mada_tipo_query;
 
 typedef struct mo_mada {
@@ -780,9 +784,10 @@ static inline mo_mada *mo_mada_core(mo_mada *consultas, tipo_dato *numeros,
 
 hm_rr_bs_tabla *tablon = &(hm_rr_bs_tabla ) { 0 };
 mo_mada consultas[CACA_PODEROSA_MAX_CONSULS] = { 0 };
-tipo_dato numeros[CACA_PODEROSA_MAX_NUMS] = { 0 };
+tipo_dato numeros[CACA_PODEROSA_MAX_NUMS+2] = { 0 };
 natural consultas_tam = 0;
 natural numeros_tam = 0;
+natural consultas_interfalo[CACA_PODEROSA_MAX_CONSULS][2]={0};
 
 void caca_poderosa_anade_caca(tipo_dato numero) {
 	entero_largo_sin_signo cardinalidad_actual = 0;
@@ -820,9 +825,38 @@ void caca_poderosa_quita_caca(tipo_dato numero) {
 
 static inline void caca_poderosa_core() {
 	hash_map_robin_hood_back_shift_init(tablon, CACA_PODEROSA_MAX_NUMS << 1);
+	for(int i=1;i<=numeros_tam;i++)
+	{
+		bool nueva_mierda=falso;
+		hash_map_robin_hood_back_shift_pon(tablon, numeros[i], 0, &nueva_mierda) ;
+	}
+	mo_mada_core(consultas,numeros,consultas_tam,numeros_tam);
+	for(int i=0;i<consultas_tam;i++)
+	{
+		mo_mada *consul_act=(consultas+i);
+//		printf("%lld\n",consul_act->resulcaca);
+	}
+}
+
+static inline void caca_poderosa_main()
+{
+	scanf("%u %u\n",&numeros_tam,&consultas_tam);
+	caca_log_debug("num nums %u num consuls %u",numeros_tam,consultas_tam);
+caca_comun_lee_matrix_long_stdin((tipo_dato *)numeros+1, &(int){0}, NULL, 1, numeros_tam);
+caca_comun_lee_matrix_long_stdin((tipo_dato *)consultas_interfalo, &(int){0}, NULL, consultas_tam, 2);
+	for(int i=0;i<consultas_tam;i++)
+	{
+		natural *consul_inter_act=consultas_interfalo[i];
+		mo_mada *consul_act=(consultas+i);
+		consul_act->orden=consul_act->idx_query=i;
+        	consul_act->intervalo_idx_ini=consul_inter_act[0];
+        	consul_act->intervalo_idx_fin=consul_inter_act[1];
+		caca_log_debug("se q t %u: %u-%u",i,consul_act->intervalo_idx_ini,consul_act->intervalo_idx_fin);
+	}
+	caca_poderosa_core();
 }
 
 int main(void) {
-	puts("he corrido con algo de suerte"); /* prints he corrido con algo de suerte */
+	caca_poderosa_main();
 	return EXIT_SUCCESS;
 }
