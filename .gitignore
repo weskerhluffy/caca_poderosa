@@ -10,3 +10,7 @@ src/caca_poderosa
 *.plist
 
 src/caca_poderosa.dSYM/Contents/Resources/DWARF/caca_poderosa
+
+*.swp
+
+*.s

@@ -650,37 +650,36 @@ natural ocurrencias[CACA_PODEROSA_MAX_NUM + 2] = { 0 };
 
 #define caca_poderosa_quita_caca(numero) \
         __asm__ (\
-                        "xor %%rdx,%%rdx\n"\
-                        "MOVSx %[num],%%rsi\n"\
-                        "mov (%[ocurr],%%rsi,4),%%eax\n"\
-                        "mov $1,%%ecx\n"\
-                        "shl %%cl,%%eax\n"\
-                        "mov %%eax,%%r8d\n"\
-                        "mov %%r8d,%%ecx\n"\
-                        "mov $1,%%eax\n"\
-                        "sub %%ecx,%%eax\n"\
-                        "movsx %%eax,%%rax\n"\
-                        "mulq %%rsi\n"\
-                        "add %%rax,%[resu]\n"\
-                        "subl $1,(%[ocurr],%%rsi,4)\n"\
-:[resu] "=m" (mo_mada_resultado)\
+                        "mov (%[ocurr],%[num],4),%%eax\n"\
+                        "mov $2,%%edx\n"\
+                        "mul %%edx\n"\
+                        "sub $1,%%eax\n"\
+                        "mov $-1,%%edx\n"\
+                        "imul %%edx\n"\
+                        "imul %[num]\n"\
+                        "lea %[resu_low],%%esi\n"\
+                        "add %%eax,%[resu_low]\n"\
+                        "adc %%edx,4(%%esi)\n"\
+                        "subl $1,(%[ocurr],%[num],4)\n"\
+:[resu_low] "=m" (mo_mada_resultado)\
 : [num] "r" (numero), [ocurr] "r" (ocurrencias)\
-            :"rax","rdx","rcx","r8","rsi")
+            :"eax","edx","esi")
 
 #define caca_poderosa_anade_caca(numero) \
         __asm__ (\
-                        "MOVSx %[num],%%rsi\n"\
-                        "mov (%[ocurr],%%rsi,4),%%eax\n"\
-                        "mov $1,%%ecx\n"\
-                        "shl %%cl,%%eax\n"\
+                        "mov (%[ocurr],%[num],4),%%eax\n"\
+                        "mov $2,%%edx\n"\
+                        "mul %%edx\n"\
                         "add $1,%%eax\n"\
-                        "movsx %%eax,%%rax\n"\
-                        "mulq %%rsi\n"\
-                        "add %%rax,%[resu]\n"\
-                        "addl $1,(%[ocurr],%%rsi,4)\n"\
-:[resu] "=m" (mo_mada_resultado)\
+                        "mul %[num]\n"\
+                        "lea %[resu_low],%%esi\n"\
+                        "add %%eax,%[resu_low]\n"\
+                        "adc %%edx,4(%%esi)\n"\
+                        "addl $1,(%[ocurr],%[num],4)\n"\
+:[resu_low] "=m" (mo_mada_resultado)\
 : [num] "r" (numero), [ocurr] "r" (ocurrencias)\
-            :"rax","rdx","rcx","r8","rsi")
+            :"eax","edx","esi")
+
 
 #if 1
 typedef enum mo_mada_tipo_query {
@@ -794,6 +793,7 @@ static inline mo_mada *mo_mada_core(mo_mada *consultas, tipo_dato *numeros,
 				consul_idx_izq);
 		while (idx_izq_act < consul_idx_izq) {
 			mo_mada_fn_quita_caca(numeros[idx_izq_act]);
+			caca_log_debug("perron %lld\n", mo_mada_resultado);
 			idx_izq_act++;
 		}
 
@@ -801,6 +801,7 @@ static inline mo_mada *mo_mada_core(mo_mada *consultas, tipo_dato *numeros,
 				consul_idx_der);
 		while (idx_der_act > consul_idx_der) {
 			mo_mada_fn_quita_caca(numeros[idx_der_act]);
+			caca_log_debug("perron1 %lld\n", mo_mada_resultado);
 			idx_der_act--;
 		}
 
@@ -824,7 +825,6 @@ tipo_dato numeros[CACA_PODEROSA_MAX_NUMS + 2] = { 0 };
 natural consultas_tam = 0;
 natural numeros_tam = 0;
 natural consultas_interfalo[CACA_PODEROSA_MAX_CONSULS][2] = { 0 };
-
 
 static inline void caca_poderosa_core() {
 	hash_map_robin_hood_back_shift_init(tablon, CACA_PODEROSA_MAX_NUMS << 1);
