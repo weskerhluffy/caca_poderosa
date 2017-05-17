@@ -791,7 +791,7 @@ tipo_dato numeros[CACA_PODEROSA_MAX_NUMS + 2] = { 0 };
 natural consultas_tam = 0;
 natural numeros_tam = 0;
 natural consultas_interfalo[CACA_PODEROSA_MAX_CONSULS][2] = { 0 };
-natural ocurrencias[CACA_PODEROSA_MAX_NUM+2] = { 0 };
+natural ocurrencias[CACA_PODEROSA_MAX_NUM + 2] = { 0 };
 
 void caca_poderosa_anade_caca(tipo_dato numero) {
 	entero_largo_sin_signo cardinalidad_actual = 0;
@@ -807,18 +807,27 @@ void caca_poderosa_anade_caca(tipo_dato numero) {
 	mo_mada_resultado = mo_mada_resultado - viejo_valor + nuevo_valor;
 }
 
-void caca_poderosa_quita_caca(tipo_dato numero) {
-	entero_largo_sin_signo cardinalidad_actual = 0;
-	entero_largo_sin_signo cardinalidad_nueva = 0;
-	entero_largo viejo_valor = 0;
-	entero_largo nuevo_valor = 0;
-	cardinalidad_actual = ocurrencias[numero];
-	viejo_valor = cardinalidad_actual * cardinalidad_actual * numero;
-	cardinalidad_nueva = cardinalidad_actual - 1;
-	nuevo_valor = cardinalidad_nueva * cardinalidad_nueva * numero;
+#define caca_poderosa_quita_caca1(ocurrencias, numero) \
+        __asm__ (\
+                        "xor %%rdx,%%rdx\n"\
+                        "movq %[num],%%rsi\n"\
+                        "movq (%[ocurr],%%esi,4),%%rax\n"\
+                        "mov $1,%%ecx\n"\
+                        "shl %%cl,%%eax\n"\
+                        "mov %%eax,%%r8d\n"\
+                        "mov %%r8d,%%ecx\n"\
+                        "mov $1,%%eax\n"\
+                        "sub %%ecx,%%eax\n"\
+                        "mulq %%rsi\n"\
+                        "add %%rax,%[resu]\n"\
+:[resu] "=m" (mo_mada_resultado)\
+: [num] "r" (numero), [ocurr] "r" (ocurrencias)\
+            :"rax","rdx","rcx","r8","rsi")
 
-	ocurrencias[numero] = cardinalidad_nueva;
-	mo_mada_resultado = mo_mada_resultado - viejo_valor + nuevo_valor;
+void caca_poderosa_quita_caca(tipo_dato numero) {
+	mo_mada_resultado = mo_mada_resultado
+			+ (numero * (1 - (ocurrencias[numero] << 1)));
+	ocurrencias[numero]--;
 }
 
 static inline void caca_poderosa_core() {
@@ -831,7 +840,7 @@ static inline void caca_poderosa_core() {
 	mo_mada_core(consultas, numeros, consultas_tam, numeros_tam);
 	for (int i = 0; i < consultas_tam; i++) {
 		mo_mada *consul_act = (consultas + i);
-		printf("%lld\n",consul_act->resulcaca);
+		printf("%lld\n", consul_act->resulcaca);
 	}
 }
 
