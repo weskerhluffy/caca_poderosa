@@ -648,6 +648,27 @@ static inline bool hash_map_robin_hood_back_shift_esta_vacio(hm_rr_bs_tabla *ht)
 void caca_poderosa_quita_caca(tipo_dato numero);
 void caca_poderosa_anade_caca(tipo_dato numero);
 
+#define CACA_PODEROSA_MAX_NUM 1000000
+natural ocurrencias[CACA_PODEROSA_MAX_NUM + 2] = { 0 };
+
+#define caca_poderosa_quita_caca1(numero) \
+        __asm__ (\
+                        "xor %%rdx,%%rdx\n"\
+                        "MOVSx %[num],%%rsi\n"\
+                        "mov (%[ocurr],%%rsi,4),%%eax\n"\
+                        "mov $1,%%ecx\n"\
+                        "shl %%cl,%%eax\n"\
+                        "mov %%eax,%%r8d\n"\
+                        "mov %%r8d,%%ecx\n"\
+                        "mov $1,%%eax\n"\
+                        "sub %%ecx,%%eax\n"\
+                        "movsx %%eax,%%rax\n"\
+                        "mulq %%rsi\n"\
+                        "add %%rax,%[resu]\n"\
+:[resu] "=m" (mo_mada_resultado)\
+: [num] "r" (numero), [ocurr] "r" (ocurrencias)\
+            :"rax","rdx","rcx","r8","rsi")
+
 #if 1
 typedef enum mo_mada_tipo_query {
 	mo_mada_actualizacion = 'U', mo_mada_consulta = 0
@@ -705,7 +726,7 @@ int mo_mada_ord_idx_query(const void *pa, const void *pb) {
 #define mo_mada_fn_ord_mo mo_mada_ord_bloque
 #define mo_mada_fn_ord_idx mo_mada_ord_idx_query
 #define mo_mada_fn_anade_caca caca_poderosa_anade_caca
-#define mo_mada_fn_quita_caca caca_poderosa_quita_caca
+#define mo_mada_fn_quita_caca caca_poderosa_quita_caca1
 
 static inline mo_mada *mo_mada_core(mo_mada *consultas, tipo_dato *numeros,
 		natural num_consultas, natural num_numeros) {
@@ -783,7 +804,6 @@ static inline mo_mada *mo_mada_core(mo_mada *consultas, tipo_dato *numeros,
 
 #define CACA_PODEROSA_MAX_CONSULS 200000
 #define CACA_PODEROSA_MAX_NUMS 200000
-#define CACA_PODEROSA_MAX_NUM 1000000
 
 hm_rr_bs_tabla *tablon = &(hm_rr_bs_tabla ) { 0 };
 mo_mada consultas[CACA_PODEROSA_MAX_CONSULS] = { 0 };
@@ -791,7 +811,6 @@ tipo_dato numeros[CACA_PODEROSA_MAX_NUMS + 2] = { 0 };
 natural consultas_tam = 0;
 natural numeros_tam = 0;
 natural consultas_interfalo[CACA_PODEROSA_MAX_CONSULS][2] = { 0 };
-natural ocurrencias[CACA_PODEROSA_MAX_NUM + 2] = { 0 };
 
 void caca_poderosa_anade_caca(tipo_dato numero) {
 	entero_largo_sin_signo cardinalidad_actual = 0;
@@ -807,26 +826,11 @@ void caca_poderosa_anade_caca(tipo_dato numero) {
 	mo_mada_resultado = mo_mada_resultado - viejo_valor + nuevo_valor;
 }
 
-#define caca_poderosa_quita_caca1(ocurrencias, numero) \
-        __asm__ (\
-                        "xor %%rdx,%%rdx\n"\
-                        "movq %[num],%%rsi\n"\
-                        "movq (%[ocurr],%%esi,4),%%rax\n"\
-                        "mov $1,%%ecx\n"\
-                        "shl %%cl,%%eax\n"\
-                        "mov %%eax,%%r8d\n"\
-                        "mov %%r8d,%%ecx\n"\
-                        "mov $1,%%eax\n"\
-                        "sub %%ecx,%%eax\n"\
-                        "mulq %%rsi\n"\
-                        "add %%rax,%[resu]\n"\
-:[resu] "=m" (mo_mada_resultado)\
-: [num] "r" (numero), [ocurr] "r" (ocurrencias)\
-            :"rax","rdx","rcx","r8","rsi")
-
 void caca_poderosa_quita_caca(tipo_dato numero) {
+	caca_log_debug("o shit %lld",
+			numero*((entero_largo)1-(ocurrencias[numero]<<1)));
 	mo_mada_resultado = mo_mada_resultado
-			+ (numero * (1 - (ocurrencias[numero] << 1)));
+			+ (numero * ((entero_largo) 1 - (ocurrencias[numero] << 1)));
 	ocurrencias[numero]--;
 }
 
