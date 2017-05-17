@@ -57,9 +57,9 @@ typedef enum BOOLEANOS {
 } bool;
 
 /*
-#define CACA_COMUN_TIPO_ASSERT CACA_COMUN_ASSERT_SUAVECITO
+ #define CACA_COMUN_TIPO_ASSERT CACA_COMUN_ASSERT_SUAVECITO
  */
- #define CACA_COMUN_TIPO_ASSERT CACA_COMUN_ASSERT_DUROTE
+#define CACA_COMUN_TIPO_ASSERT CACA_COMUN_ASSERT_DUROTE
 
 #define assert_timeout_dummy(condition) 0;
 //static inline void caca_log_debug_dummy(const char *format, ...) { }
@@ -154,7 +154,9 @@ void caca_comun_timestamp(char *stime) {
 	time_t ltime;
 	struct tm result;
 	long ms;
+#ifndef ONLINE_JUDGE
 	struct timespec spec;
+#endif
 	char parte_milisecundos[50];
 
 	ltime = time(NULL );
@@ -166,8 +168,8 @@ void caca_comun_timestamp(char *stime) {
 
 	*(stime + strlen(stime) - 1) = ' ';
 
-	caca_comun_current_utc_time(&spec);
 #ifndef ONLINE_JUDGE
+	caca_comun_current_utc_time(&spec);
 	ms = round(spec.tv_nsec / 1.0e3);
 #endif
 	sprintf(parte_milisecundos, "%ld", ms);
@@ -781,28 +783,27 @@ static inline mo_mada *mo_mada_core(mo_mada *consultas, tipo_dato *numeros,
 
 #define CACA_PODEROSA_MAX_CONSULS 200000
 #define CACA_PODEROSA_MAX_NUMS 200000
+#define CACA_PODEROSA_MAX_NUM 1000000
 
 hm_rr_bs_tabla *tablon = &(hm_rr_bs_tabla ) { 0 };
 mo_mada consultas[CACA_PODEROSA_MAX_CONSULS] = { 0 };
-tipo_dato numeros[CACA_PODEROSA_MAX_NUMS+2] = { 0 };
+tipo_dato numeros[CACA_PODEROSA_MAX_NUMS + 2] = { 0 };
 natural consultas_tam = 0;
 natural numeros_tam = 0;
-natural consultas_interfalo[CACA_PODEROSA_MAX_CONSULS][2]={0};
+natural consultas_interfalo[CACA_PODEROSA_MAX_CONSULS][2] = { 0 };
+natural ocurrencias[CACA_PODEROSA_MAX_NUM+2] = { 0 };
 
 void caca_poderosa_anade_caca(tipo_dato numero) {
 	entero_largo_sin_signo cardinalidad_actual = 0;
 	entero_largo_sin_signo cardinalidad_nueva = 0;
 	entero_largo viejo_valor = 0;
 	entero_largo nuevo_valor = 0;
-	hm_iter idx = 0;
-	idx = hash_map_robin_hood_back_shift_obten(tablon, numero,
-			&cardinalidad_actual);
+	cardinalidad_actual = ocurrencias[numero];
 	viejo_valor = cardinalidad_actual * cardinalidad_actual * numero;
 	cardinalidad_nueva = cardinalidad_actual + 1;
 	nuevo_valor = cardinalidad_nueva * cardinalidad_nueva * numero;
 
-	hash_map_robin_hood_back_shift_indice_pon_valor(tablon, idx,
-			cardinalidad_nueva);
+	ocurrencias[numero] = cardinalidad_nueva;
 	mo_mada_resultado = mo_mada_resultado - viejo_valor + nuevo_valor;
 }
 
@@ -811,47 +812,44 @@ void caca_poderosa_quita_caca(tipo_dato numero) {
 	entero_largo_sin_signo cardinalidad_nueva = 0;
 	entero_largo viejo_valor = 0;
 	entero_largo nuevo_valor = 0;
-	hm_iter idx = 0;
-	idx = hash_map_robin_hood_back_shift_obten(tablon, numero,
-			&cardinalidad_actual);
+	cardinalidad_actual = ocurrencias[numero];
 	viejo_valor = cardinalidad_actual * cardinalidad_actual * numero;
 	cardinalidad_nueva = cardinalidad_actual - 1;
 	nuevo_valor = cardinalidad_nueva * cardinalidad_nueva * numero;
 
-	hash_map_robin_hood_back_shift_indice_pon_valor(tablon, idx,
-			cardinalidad_nueva);
+	ocurrencias[numero] = cardinalidad_nueva;
 	mo_mada_resultado = mo_mada_resultado - viejo_valor + nuevo_valor;
 }
 
 static inline void caca_poderosa_core() {
 	hash_map_robin_hood_back_shift_init(tablon, CACA_PODEROSA_MAX_NUMS << 1);
-	for(int i=1;i<=numeros_tam;i++)
-	{
-		bool nueva_mierda=falso;
-		hash_map_robin_hood_back_shift_pon(tablon, numeros[i], 0, &nueva_mierda) ;
+	for (int i = 1; i <= numeros_tam; i++) {
+		bool nueva_mierda = falso;
+		hash_map_robin_hood_back_shift_pon(tablon, numeros[i], 0,
+				&nueva_mierda);
 	}
-	mo_mada_core(consultas,numeros,consultas_tam,numeros_tam);
-	for(int i=0;i<consultas_tam;i++)
-	{
-		mo_mada *consul_act=(consultas+i);
-//		printf("%lld\n",consul_act->resulcaca);
+	mo_mada_core(consultas, numeros, consultas_tam, numeros_tam);
+	for (int i = 0; i < consultas_tam; i++) {
+		mo_mada *consul_act = (consultas + i);
+		printf("%lld\n",consul_act->resulcaca);
 	}
 }
 
-static inline void caca_poderosa_main()
-{
-	scanf("%u %u\n",&numeros_tam,&consultas_tam);
-	caca_log_debug("num nums %u num consuls %u",numeros_tam,consultas_tam);
-caca_comun_lee_matrix_long_stdin((tipo_dato *)numeros+1, &(int){0}, NULL, 1, numeros_tam);
-caca_comun_lee_matrix_long_stdin((tipo_dato *)consultas_interfalo, &(int){0}, NULL, consultas_tam, 2);
-	for(int i=0;i<consultas_tam;i++)
-	{
-		natural *consul_inter_act=consultas_interfalo[i];
-		mo_mada *consul_act=(consultas+i);
-		consul_act->orden=consul_act->idx_query=i;
-        	consul_act->intervalo_idx_ini=consul_inter_act[0];
-        	consul_act->intervalo_idx_fin=consul_inter_act[1];
-		caca_log_debug("se q t %u: %u-%u",i,consul_act->intervalo_idx_ini,consul_act->intervalo_idx_fin);
+static inline void caca_poderosa_main() {
+	scanf("%u %u\n", &numeros_tam, &consultas_tam);
+	caca_log_debug("num nums %u num consuls %u", numeros_tam, consultas_tam);
+	caca_comun_lee_matrix_long_stdin((tipo_dato *) numeros + 1, &(int ) { 0 },
+			NULL, 1, numeros_tam);
+	caca_comun_lee_matrix_long_stdin((tipo_dato *) consultas_interfalo,
+			&(int ) { 0 }, NULL, consultas_tam, 2);
+	for (int i = 0; i < consultas_tam; i++) {
+		natural *consul_inter_act = consultas_interfalo[i];
+		mo_mada *consul_act = (consultas + i);
+		consul_act->orden = consul_act->idx_query = i;
+		consul_act->intervalo_idx_ini = consul_inter_act[0];
+		consul_act->intervalo_idx_fin = consul_inter_act[1];
+		caca_log_debug("se q t %u: %u-%u", i, consul_act->intervalo_idx_ini,
+				consul_act->intervalo_idx_fin);
 	}
 	caca_poderosa_core();
 }
