@@ -250,29 +250,6 @@ static char *caca_comun_arreglo_a_cadena_natural(natural *arreglo,
 	*(ap_buffer + characteres_escritos) = '\0';
 	return ap_buffer;
 }
-
-static char *caca_comun_arreglo_a_cadena_largo(entero_largo *arreglo, int tam_arreglo,
-		char *buffer) {
-	int i;
-	char *ap_buffer = NULL;
-	int characteres_escritos = 0;
-#ifdef ONLINE_JUDGE
-	return NULL;
-#endif
-
-	memset(buffer, 0, 100);
-	ap_buffer = buffer;
-
-	for (i = 0; i < tam_arreglo; i++) {
-		characteres_escritos += sprintf(ap_buffer + characteres_escritos,
-				"%lld", *(arreglo + i));
-		if (i < tam_arreglo - 1) {
-			*(ap_buffer + characteres_escritos++) = ',';
-		}
-	}
-	*(ap_buffer + characteres_escritos) = '\0';
-	return ap_buffer;
-}
 #endif
 void caca_comun_strreplace(char s[], char chr, char repl_chr) {
 	int i = 0;
@@ -669,7 +646,6 @@ static inline bool hash_map_robin_hood_back_shift_esta_vacio(hm_rr_bs_tabla *ht)
 #endif
 
 #define CACA_PODEROSA_MAX_NUM 1000000
-#define CACA_PODEROSA_MAX_NUMEROS 200000
 natural ocurrencias[CACA_PODEROSA_MAX_NUM + 2] = { 0 };
 
 #define caca_poderosa_quita_caca(numero) \
@@ -703,6 +679,7 @@ natural ocurrencias[CACA_PODEROSA_MAX_NUM + 2] = { 0 };
 :[resu_low] "=m" (mo_mada_resultado)\
 : [num] "r" (numero), [ocurr] "r" (ocurrencias)\
             :"eax","edx","esi")
+
 
 #if 1
 typedef enum mo_mada_tipo_query {
@@ -839,124 +816,6 @@ static inline mo_mada *mo_mada_core(mo_mada *consultas, tipo_dato *numeros,
 
 #endif
 
-#if 1
-#define BIT_CH_VALOR_INVALIDO ULLONG_MAX
-#define BIT_CH_MAX_NODOS CACA_PODEROSA_MAX_NUMEROS
-
-typedef struct bit_ch {
-	natural num_nodos_bit_ch;
-	entero_largo_sin_signo nodos_bit_ch[BIT_CH_MAX_NODOS + 2];
-} bit_ch;
-
-static inline void bit_ch_init(bit_ch *bit, tipo_dato valor_inicial,
-		natural num_cacas, tipo_dato *numeros) {
-
-	bit->num_nodos_bit_ch = num_cacas;
-}
-
-#if 1
-static inline void bit_ch_aumenta(bit_ch *bit, tipo_dato nuevo_valor,
-		natural idx) {
-	entero_largo_sin_signo *nodos = bit->nodos_bit_ch;
-	caca_log_debug("q verga actualizando %u con %d", idx, nuevo_valor);
-	for (natural i = idx; i <= bit->num_nodos_bit_ch; i += (i & (-i))) {
-		entero_largo ass = nodos[i];
-		caca_log_debug("actualizando caca %u con %d antes %lld", i, nuevo_valor,
-				nodos[i]);
-		ass += nuevo_valor;
-		nodos[i] = ass;
-		caca_log_debug("actualizado caca %u aora %lld", i, nodos[i]);
-	}
-}
-
-static inline tipo_dato bit_ch_consulta(bit_ch *bit, natural idx) {
-	entero_largo_sin_signo *nodos = bit->nodos_bit_ch;
-	entero_largo_sin_signo res = 0;
-	for (int i = idx; i > 0; i -= (i & (-i))) {
-		assert_timeout(i<BIT_CH_MAX_NODOS + 2);
-		caca_log_debug("consultando caca %u tiene %lld", i, nodos[i]);
-		res += nodos[i];
-	}
-	caca_log_debug("regresando %lld", res);
-	return res;
-}
-
-static inline void bit_ch_aumenta_rango(bit_ch *bit, tipo_dato nuevo_valor,
-		natural idx_ini, natural idx_fin) {
-	caca_log_debug("aumentando de %u a %u con valor %lld", idx_ini, idx_fin,
-			nuevo_valor);
-
-	bit_ch_aumenta(bit, nuevo_valor, idx_ini);
-	bit_ch_aumenta(bit, -nuevo_valor, idx_fin + 1);
-}
-
-static inline void bit_ch_aumenta_rango_consulta_rango(bit_ch *bit_puto,
-		bit_ch *bit_aux, natural idx_ini, natural idx_fin,
-		tipo_dato nuevo_valor) {
-
-	caca_log_debug("aumentando de %u a %u con valor %lld para consulta rango",
-			idx_ini, idx_fin, nuevo_valor);
-
-	bit_ch_aumenta_rango(bit_puto, nuevo_valor, idx_ini, idx_fin);
-	caca_log_debug(
-			"actualizando para consulta rango inicial %d con %lld (%lld * %u)",
-			idx_ini, nuevo_valor * (idx_ini - 1), nuevo_valor, idx_ini - 1);
-	bit_ch_aumenta(bit_aux, nuevo_valor * (idx_ini - 1), idx_ini);
-	caca_log_debug(
-			"actualizando para consulta rango final %d con %lld(%lld,%u)",
-			idx_fin + 1, -nuevo_valor * idx_fin, -nuevo_valor, idx_fin);
-	bit_ch_aumenta(bit_aux, -nuevo_valor * idx_fin, idx_fin + 1);
-}
-
-static inline tipo_dato bit_ch_consulta_rango_actualizado_rango(
-		bit_ch *bit_puto, bit_ch *bit_aux, natural idx) {
-	tipo_dato resul = 0;
-	tipo_dato valor_puto = 0;
-	tipo_dato valor_aux = 0;
-
-	valor_puto = bit_ch_consulta(bit_puto, idx);
-
-	caca_log_debug("el valor putual en %u es %lld, aportara %lld (%lld * %u)",
-			idx, valor_puto, valor_puto * idx, valor_puto, idx);
-
-	valor_aux = bit_ch_consulta(bit_aux, idx);
-
-	caca_log_debug("el valor aux en %u es %lld", idx, valor_puto);
-
-	resul = valor_puto * idx - valor_aux;
-
-	caca_log_debug("la suma acumulacaca hasta %u es %lld", idx, resul);
-
-	return resul;
-}
-
-static inline tipo_dato bit_ch_consulta_rango(bit_ch *bit_puto, bit_ch *bit_aux,
-		natural idx_ini, natural idx_fin) {
-	tipo_dato resul = 0;
-	tipo_dato resul_idx_ini = 0;
-	tipo_dato resul_idx_fin = 0;
-
-	resul_idx_ini = bit_ch_consulta_rango_actualizado_rango(bit_puto, bit_aux,
-			idx_ini - 1);
-	caca_log_debug("la suma acumulacaca ini hasta %u es %lld", idx_ini,
-			resul_idx_ini);
-
-	resul_idx_fin = bit_ch_consulta_rango_actualizado_rango(bit_puto, bit_aux,
-			idx_fin);
-	caca_log_debug("la suma acumulacaca fin hasta %u es %lld", idx_fin,
-			resul_idx_fin);
-
-	resul = resul_idx_fin - resul_idx_ini;
-
-	caca_log_debug("la suma acumulacaca del rango %u-%u es %lld", idx_ini,
-			idx_fin, resul);
-
-	return resul;
-}
-#endif
-
-#endif
-
 #define CACA_PODEROSA_MAX_CONSULS 200000
 #define CACA_PODEROSA_MAX_NUMS 200000
 
@@ -966,95 +825,18 @@ tipo_dato numeros[CACA_PODEROSA_MAX_NUMS + 2] = { 0 };
 natural consultas_tam = 0;
 natural numeros_tam = 0;
 natural consultas_interfalo[CACA_PODEROSA_MAX_CONSULS][2] = { 0 };
-bit_ch *biatch = &(bit_ch ) { 0 };
-
-int caca_poderosa_ord_limite_der(const void *pa, const void *pb) {
-	int res = 0;
-	mo_mada *a = (mo_mada *) pa;
-	mo_mada *b = (mo_mada *) pb;
-
-	if (a->intervalo_idx_fin == b->intervalo_idx_fin) {
-		if (a->intervalo_idx_ini == b->intervalo_idx_ini) {
-			res = a->orden - b->orden;
-		} else {
-			res = a->intervalo_idx_ini - b->intervalo_idx_ini;
-		}
-	} else {
-		res = a->intervalo_idx_fin - b->intervalo_idx_fin;
-	}
-	return res;
-}
-
-int caca_poderosa_ord_idx_query(const void *pa, const void *pb) {
-	int res = 0;
-	mo_mada *a = (mo_mada *) pa;
-	mo_mada *b = (mo_mada *) pb;
-
-	res = a->idx_query - b->idx_query;
-	return res;
-}
 
 static inline void caca_poderosa_core() {
-	entero_largo incremento_actual = 0;
-	entero_largo detrimento_actual = 0;
-	mo_mada *consul_act = NULL;
-	natural idx_consul_act = 0;
-
 	hash_map_robin_hood_back_shift_init(tablon, CACA_PODEROSA_MAX_NUMS << 1);
 	for (int i = 1; i <= numeros_tam; i++) {
 		bool nueva_mierda = falso;
 		hash_map_robin_hood_back_shift_pon(tablon, numeros[i], 0,
 				&nueva_mierda);
-		ocurrencias[numeros[i]] = -1;
 	}
-
-	caca_log_debug("inicializando bitch");
-	bit_ch_init(biatch, 0, numeros_tam, numeros);
-	for (int i = 1; i <= numeros_tam; i++) {
-		ocurrencias[numeros[i]] += 1;
-		bit_ch_aumenta(biatch, (2 * ocurrencias[numeros[i]] + 1) * numeros[i],
-				i);
-	}
-
-	qsort(consultas, consultas_tam, sizeof(mo_mada),
-			caca_poderosa_ord_limite_der);
-
-	consul_act = consultas + idx_consul_act;
-	caca_log_debug("la consul inicial %u-%u pos %u resulta %lld",
-			consul_act->intervalo_idx_ini, consul_act->intervalo_idx_fin,
-			idx_consul_act, consul_act->resulcaca);
-	for (int i = 1; i <= numeros_tam; i++) {
-		natural num_actual = numeros[i];
-		natural ocurrencia_actual = ocurrencias[num_actual];
-		caca_log_debug("procesando num %u pos %u ocurrencias %u", num_actual, i,
-				ocurrencia_actual);
-
-		while (consul_act->intervalo_idx_ini == i
-				&& idx_consul_act < consultas_tam) {
-			natural idx_lim_der = consul_act->intervalo_idx_fin;
-			entero_largo_sin_signo resul = 0;
-
-			resul = bit_ch_consulta(biatch, idx_lim_der);
-
-			consul_act->resulcaca = resul;
-			caca_log_debug("la consul %u-%u pos %u resulta %lld",
-					consul_act->intervalo_idx_ini,
-					consul_act->intervalo_idx_fin, idx_consul_act,
-					consul_act->resulcaca);
-
-			if (ocurrencia_actual) {
-				bit_ch_aumenta(biatch, -2 * num_actual, 1);
-			}
-			consul_act = consultas + ++idx_consul_act;
-		}
-	}
-
-	qsort(consultas, consultas_tam, sizeof(mo_mada),
-			caca_poderosa_ord_idx_query);
-
+	mo_mada_core(consultas, numeros, consultas_tam, numeros_tam);
 	for (int i = 0; i < consultas_tam; i++) {
 		mo_mada *consul_act = (consultas + i);
-//		printf("%lld\n", consul_act->resulcaca);
+		printf("%lld\n", consul_act->resulcaca);
 	}
 }
 
