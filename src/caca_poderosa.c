@@ -791,26 +791,32 @@ tipo_dato numeros[CACA_PODEROSA_MAX_NUMS + 2] = { 0 };
 natural consultas_tam = 0;
 natural numeros_tam = 0;
 natural consultas_interfalo[CACA_PODEROSA_MAX_CONSULS][2] = { 0 };
-natural ocurrencias[CACA_PODEROSA_MAX_NUM + 2] = { 0 };
+//natural ocurrencias[CACA_PODEROSA_MAX_NUM + 2] = { 0 };
 
 void caca_poderosa_anade_caca(tipo_dato numero) {
 	entero_largo_sin_signo cardinalidad_actual = 0;
-	cardinalidad_actual = ocurrencias[numero];
+	hm_iter iter = 0;
+	iter = hash_map_robin_hood_back_shift_obten(tablon, numero,
+			(entero_largo*) &cardinalidad_actual);
 
 	mo_mada_resultado += ((cardinalidad_actual << 1) + 1) * numero;
-	ocurrencias[numero] = cardinalidad_actual + 1;
+	hash_map_robin_hood_back_shift_indice_pon_valor(tablon, iter,
+			cardinalidad_actual + 1);
 }
 
 void caca_poderosa_quita_caca(tipo_dato numero) {
 	entero_largo_sin_signo cardinalidad_actual = 0;
-	cardinalidad_actual = ocurrencias[numero];
+	hm_iter iter = 0;
+	iter = hash_map_robin_hood_back_shift_obten(tablon, numero,
+			(entero_largo*) &cardinalidad_actual);
 
 	mo_mada_resultado += (1 - (cardinalidad_actual << 1)) * numero;
-	ocurrencias[numero] = cardinalidad_actual - 1;
+	hash_map_robin_hood_back_shift_indice_pon_valor(tablon, iter,
+			cardinalidad_actual - 1);
 }
 
 static inline void caca_poderosa_core() {
-	hash_map_robin_hood_back_shift_init(tablon, CACA_PODEROSA_MAX_NUMS << 1);
+	hash_map_robin_hood_back_shift_init(tablon, CACA_PODEROSA_MAX_NUMS << 6);
 	for (int i = 1; i <= numeros_tam; i++) {
 		bool nueva_mierda = falso;
 		hash_map_robin_hood_back_shift_pon(tablon, numeros[i], 0,
