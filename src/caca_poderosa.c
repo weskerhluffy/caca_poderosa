@@ -695,6 +695,7 @@ typedef struct mo_mada {
 	entero_largo resulcaca;
 } mo_mada;
 
+
 natural mo_mada_tam_bloque = 0;
 entero_largo mo_mada_resultado = 0;
 
